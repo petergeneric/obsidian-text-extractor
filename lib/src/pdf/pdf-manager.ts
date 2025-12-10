@@ -33,7 +33,6 @@ class PDFWorker {
   public async run(msg: {
     data: Uint8Array
     name: string
-    paginate: boolean
     normalize: boolean
   }): Promise<any> {
     return new Promise((resolve, reject) => {
@@ -89,8 +88,6 @@ class PDFManager {
         const res = await worker.run({
           data,
           name: file.basename,
-          // TODO should this be a setting?
-          paginate: true,
           normalize: true,
         })
         const text = res.data.text as string

@@ -4,48 +4,28 @@ import * as plugin from '../../pkg'
 const decodedPlugin = decodeBase64(rustPlugin as any)
 
 function normalize(text: string) {
-  return (
-    text
-      .replace(/\n/g, ' ')
-      // Trim multiple spaces
-      .replace(/ +/g, ' ')
-      .trim()
-  )
+  if (text === null || text === undefined) return ''
+  else return text.replace(/[ \n]+/g, ' ').trim()
 }
 
 /**
  * Extract text from the PDF by calling into WASM plugin
  * @param pdf pdf buffer
- * @param shouldPaginate true to emit a markdown doc with headings per page
  * @param shouldNormalise true to normalise all spaces/newlines to a single space
  */
-function extract(
-  pdf: Uint8Array,
-  shouldPaginate: boolean,
-  shouldNormalise: boolean
-) {
-  if (shouldPaginate) {
-    // Extract text by page
-    let text = plugin.extract_pdf_text_by_pages(pdf)
+function extract(pdf: Uint8Array, shouldNormalise: boolean) {
+  // Extract text by page
+  let text = plugin.extract_pdf_text_by_pages(pdf)
 
-    // If requested, normalize text
-    if (shouldNormalise) {
-      text = text.map(normalize)
-    }
-
-    // Turn into a markdown doc
-    return text.map((text, i) => `# Page ${i + 1}^page=${i + 1}\n${text}\n\n`)
-  } else {
-    // Extract all text in one large blob
-    const text = plugin.extract_pdf_text(pdf)
-
-    // If requested, normalize text
-    if (shouldNormalise) {
-      return normalize(text)
-    } else {
-      return text
-    }
+  // If requested, normalize text
+  if (shouldNormalise) {
+    text = text.map(normalize)
   }
+
+  // Turn into a markdown doc
+  return text
+    .map((text, i) => `# Page ${i + 1}^page=${i + 1}\n${text}\n\n`)
+    .join('')
 }
 
 onmessage = async evt => {
@@ -54,11 +34,10 @@ onmessage = async evt => {
 
   try {
     const pdf = evt.data.data as Uint8Array
-    const shouldPaginage: boolean = !!evt.data.paginate
     const shouldNormalise: boolean = !!evt.data.normalize
 
     // Perform text extraction
-    const text = extract(pdf, shouldPaginage, shouldNormalise)
+    const text = extract(pdf, shouldNormalise)
 
     self.postMessage({ text })
   } catch (e) {
