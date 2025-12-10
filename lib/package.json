@@ -12,6 +12,8 @@
   "scripts": {
     "dev": "wasm-pack build --target web && rollup -c -w",
     "build": "wasm-pack build --target web && rollup -c",
+    "build:node": "wasm-pack build --target nodejs --out-dir pkg-node",
+    "pdf-extract": "node scripts/pdf-extract.mjs",
     "test": "vitest",
     "coverage": "vitest run --coverage",
     "prepublishOnly": "pnpm run build"
@@ -52,6 +54,7 @@
     "p-queue": "^7.4.1",
     "pure-md5": "^0.1.14",
     "tesseract.js": "^3.0.3",
+    "wasm-pack": "^0.13.1",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.1/xlsx-0.20.1.tgz"
   }
 }
